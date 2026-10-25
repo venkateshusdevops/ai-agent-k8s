@@ -1,0 +1,24 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": ["bedrock:InvokeModel", "bedrock:InvokeModelWithResponseStream"],
+      "Resource": [
+        "arn:aws:bedrock:*::foundation-model/anthropic.claude-*",
+        "arn:aws:bedrock:*::foundation-model/amazon.titan-embed-text-v2:0",
+        "arn:aws:bedrock:*:<ACCOUNT_ID>:inference-profile/*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": ["bedrock:Retrieve"],
+      "Resource": "arn:aws:bedrock:*:<ACCOUNT_ID>:knowledge-base/<KB_ID>"
+    },
+    {
+      "Effect": "Allow",
+      "Action": ["bedrock:ApplyGuardrail"],
+      "Resource": "arn:aws:bedrock:*:<ACCOUNT_ID>:guardrail/<GUARDRAIL_ID>"
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+# Least privilege: cluster-wide READ (no Secrets), WRITE only in listed namespaces via Role.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: k8s-agent
+  namespace: k8s-agent
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::<ACCOUNT_ID>:role/k8s-agent-bedrock   # IRSA
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: k8s-agent-read
+rules:
+  - apiGroups: [""]
+    resources: [pods, pods/log, events, nodes, services, endpoints]
+    verbs: [get, list]
+  - apiGroups: [apps]
+    resources: [deployments, replicasets]
+    verbs: [get, list]
+  - apiGroups: [metrics.k8s.io]
+    resources: [pods, nodes]
+    verbs: [get, list]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: k8s-agent-read
+subjects: [{kind: ServiceAccount, name: k8s-agent, namespace: k8s-agent}]
+roleRef: {kind: ClusterRole, name: k8s-agent-read, apiGroup: rbac.authorization.k8s.io}
+---
+# Repeat this Role/RoleBinding per namespace listed in ALLOWED_NAMESPACES.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: k8s-agent-remediate
+  namespace: apps
+rules:
+  - apiGroups: [apps]
+    resources: [deployments]
+    verbs: [patch]
+  - apiGroups: [apps]
+    resources: [deployments/scale]
+    verbs: [get, patch]
+  - apiGroups: [""]
+    resources: [pods]
+    verbs: [delete]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: k8s-agent-remediate
+  namespace: apps
+subjects: [{kind: ServiceAccount, name: k8s-agent, namespace: k8s-agent}]
+roleRef: {kind: Role, name: k8s-agent-remediate, apiGroup: rbac.authorization.k8s.io}

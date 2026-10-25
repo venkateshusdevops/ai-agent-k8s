@@ -1,0 +1,22 @@
+[project]
+name = "ai-agent-k8s"
+version = "0.1.0"
+description = "Semi-autonomous, human-in-the-loop Kubernetes remediation agent on AWS Bedrock"
+requires-python = ">=3.10"
+dependencies = ["boto3>=1.35", "kubernetes>=29.0", "numpy>=1.26"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+k8s-agent = "k8s_agent.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
